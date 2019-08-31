@@ -258,11 +258,12 @@ class Swagger(IBurpExtenderCallbacks):
     def checkVersion(self):
         """Returns the version of the OpenAPI specification being used"""
         if 'swagger' in self.resp.keys():
-            return self.resp['swagger'].strip('"')
+            return self.resp['swagger'].strip('"') if '"' in self.resp['swagger'] else self.resp['swagger'].strip("'")
         elif 'swaggerVersion' in self.resp.keys():
-            return self.resp['swaggerVersion'].strip('"')
+            return self.resp['swaggerVersion'].strip('"') if '"' in self.resp['swaggerVersion'] else \
+                self.resp['swaggerVersion'].strip("'")
         elif 'openapi' in self.resp.keys():
-            return self.resp['openapi'].strip('"')
+            return self.resp['openapi'].strip('"') if '"' in self.resp['openapi'] else self.resp['openapi'].strip('"')
         else:
             stdout.println('Please check the OpenAPI specification. The version was not identified for this API')
             return None
@@ -323,6 +324,7 @@ class Swagger(IBurpExtenderCallbacks):
         """Returns the url to be used to access the API replacing or not an URL parameter"""
         url = None
         basePath = None
+        print(self.checkVersion()[0])
         if self.checkVersion()[0] == '1':
             if 'apis' in self.resp.keys():
                 if isinstance(self.resp['apis'], list):
@@ -650,6 +652,12 @@ class YAML():
             found = re.match(r'^([^#]*)#(.*)$', item)
             if found:  # The line contains a hash / comment
                 self.content[self.content.index(item)] = found.group(1)
+        # for item in self.content:
+        #     print(len(item))
+        for item in self.content:
+            if len(item.lstrip(' ')) == 0:
+                self.content.remove(item)
+
     def yamlNormalize(self):
         """Normalization of yaml data to json"""
         dtstruct = []
